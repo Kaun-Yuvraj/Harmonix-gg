@@ -19,7 +19,7 @@ const Footer = () => {
             </p>
             <div className="flex gap-4 mt-4">
               <a
-                href="https://discord.gg/your-server"
+                href="https://discord.gg/29ZBy6hAxF"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
@@ -27,7 +27,7 @@ const Footer = () => {
                 <MessageCircle className="w-5 h-5" />
               </a>
               <a
-                href="https://github.com"
+                href="https://github.com/Saggexdd"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
