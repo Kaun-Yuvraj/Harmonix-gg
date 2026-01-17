@@ -20,19 +20,19 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const activeLineRef = useRef<HTMLDivElement>(null);
+  
+  // Refs for scrolling
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeLineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // FORCE RESET on song change
+    // Reset immediately on new song
     setLyrics([]);
     setError(null);
     setLoading(true);
 
     const fetchLyrics = async () => {
       try {
-        console.log("Auto-fetching lyrics for:", title);
-        
         const { data, error } = await supabase.functions.invoke('get-lyrics', {
           body: { videoId, title, artist }
         });
@@ -63,47 +63,35 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
       setLoading(false);
       setError("Waiting for track...");
     }
-  }, [videoId, title, artist]); // Strict dependency ensures re-run on new song
+  }, [videoId, title, artist]);
 
-  // Auto-scroll logic
+  // FIX: Custom Scroll Logic (Replaces scrollIntoView)
   useEffect(() => {
-    if (activeLineRef.current && containerRef.current) {
-      activeLineRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [currentTime, lyrics]);
+    if (!containerRef.current || !activeLineRef.current) return;
+
+    const container = containerRef.current;
+    const activeLine = activeLineRef.current;
+    
+    // Calculate the position to center the active line
+    const containerHeight = container.clientHeight;
+    const lineTop = activeLine.offsetTop;
+    const lineHeight = activeLine.clientHeight;
+    
+    const targetScroll = lineTop - (containerHeight / 2) + (lineHeight / 2);
+
+    container.scrollTo({
+      top: targetScroll,
+      behavior: 'smooth'
+    });
+  }, [currentTime]); // Scrolls only when time updates
 
   const parseLyrics = (lrc: any): LyricLine[] => {
-    // Handle both string format and pre-parsed array format from backend
     if (Array.isArray(lrc)) {
       return lrc.map((line: any) => ({
         text: line.text,
         startTime: line.time,
         duration: 0
       }));
-    }
-
-    if (typeof lrc === 'string') {
-      const lines = lrc.split('\n');
-      return lines
-        .map(line => {
-          const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
-          if (match) {
-            const minutes = parseInt(match[1]);
-            const seconds = parseInt(match[2]);
-            const ms = parseInt(match[3].padEnd(3, '0'));
-            const startTime = minutes * 60 * 1000 + seconds * 1000 + ms;
-            return {
-              text: match[4].trim(),
-              startTime,
-              duration: 0 
-            };
-          }
-          return null;
-        })
-        .filter((line): line is LyricLine => line !== null && line.text.length > 0);
     }
     return [];
   };
@@ -134,10 +122,12 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
   }
 
   return (
-    <div className="relative h-[400px] overflow-hidden" ref={containerRef}>
+    <div className="relative h-[400px] overflow-hidden rounded-2xl" ref={containerRef}>
+      {/* Top/Bottom Fade Masks */}
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-card via-card/80 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card via-card/80 to-transparent z-10 pointer-events-none" />
       
+      {/* Karaoke Icon Background */}
       <div className="absolute top-4 right-4 opacity-10">
         <Mic2 className="w-24 h-24 rotate-12" />
       </div>
