@@ -1,4 +1,4 @@
-import { Play, Pause, SkipForward, SkipBack, X, Disc } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MiniPlayerProps {
@@ -26,18 +26,15 @@ const MiniPlayer = ({
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up w-full max-w-md px-4">
-      <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full p-2 pr-6 shadow-2xl flex items-center gap-4 group hover:scale-105 transition-transform duration-300">
-        {/* Spinning Art */}
+      <div className="bg-black/80 backdrop-blur-2xl border border-white/10 rounded-full p-2 pr-6 shadow-2xl flex items-center gap-4 group hover:scale-105 transition-transform duration-300">
+        
+        {/* Fixed Artwork Display */}
         <div className={`relative w-12 h-12 flex-shrink-0 ${isPlaying ? 'animate-spin-slow' : ''}`}>
-           <div className="absolute inset-0 bg-black rounded-full border border-white/10" />
            <img
             src={currentTrack.info.artworkUrl || `https://img.youtube.com/vi/${currentTrack.info.identifier}/default.jpg`}
             alt={currentTrack.info.title}
-            className="w-full h-full rounded-full object-cover p-1"
+            className="w-full h-full rounded-full object-cover border-2 border-white/10"
           />
-          <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-2 h-2 bg-black rounded-full" />
-          </div>
         </div>
 
         {/* Info */}
