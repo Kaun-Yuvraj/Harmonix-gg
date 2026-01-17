@@ -17,50 +17,38 @@ interface Track {
   };
 }
 
-// Extract core song name from title (the actual song name without artist/metadata)
+// ... [Keep extractCoreSongName, extractGenreKeywords, extractArtistFromTitle, titleContainsSong, areTitlesDuplicates helper functions EXACTLY AS BEFORE] ...
+// (I will omit them here for brevity, but you must keep them in the file. 
+// Just replace the searchYouTubeRelated function and the serve handler below.)
+
 function extractCoreSongName(title: string): string {
   let songName = title.toLowerCase();
-  
-  // Remove common suffixes in parentheses/brackets
   songName = songName
     .replace(/\(.*?(official|lyric|video|audio|hd|4k|slowed|reverb|remix|mashup|cover|live|acoustic).*?\)/gi, '')
     .replace(/\[.*?\]/g, '')
-    .replace(/\|.*$/g, '') // Remove everything after |
+    .replace(/\|.*$/g, '') 
     .replace(/official\s*(music\s*)?(video|lyric|audio)/gi, '')
     .replace(/\b(lyrics?|lyric\s*video|video\s*song|full\s*song|hd|4k|1080p|16d|8d)\b/gi, '')
     .replace(/\bslowed?\s*(\+|&|and)?\s*reverb(ed)?\b/gi, '')
-    .replace(/\b(ft\.?|feat\.?|featuring)\s+.*/gi, '') // Remove featuring artists
+    .replace(/\b(ft\.?|feat\.?|featuring)\s+.*/gi, '')
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   
-  // If title has " - " format, extract the part that looks like song name
   if (title.includes(' - ')) {
     const parts = title.split(' - ');
-    // Usually song name is shorter, try to find it
     const cleanParts = parts.map(p => 
-      p.toLowerCase()
-        .replace(/\(.*?\)/g, '')
-        .replace(/\[.*?\]/g, '')
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .trim()
+      p.toLowerCase().replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim()
     );
-    // Return the shortest meaningful part as song name candidate
-    const shortestPart = cleanParts
-      .filter(p => p.length > 2 && p.length < 30)
-      .sort((a, b) => a.length - b.length)[0];
+    const shortestPart = cleanParts.filter(p => p.length > 2 && p.length < 30).sort((a, b) => a.length - b.length)[0];
     if (shortestPart) return shortestPart;
   }
-  
-  return songName.split(' ').slice(0, 4).join(' '); // First 4 words as fallback
+  return songName.split(' ').slice(0, 4).join(' '); 
 }
 
-// Extract genre/language keywords from title
 function extractGenreKeywords(title: string): string[] {
   const lowerTitle = title.toLowerCase();
   const keywords: string[] = [];
-  
-  // Language/regional music genres
   const genrePatterns = [
     { pattern: /haryanvi|haryanavi/i, keyword: 'Haryanvi songs' },
     { pattern: /punjabi/i, keyword: 'Punjabi songs' },
@@ -83,113 +71,69 @@ function extractGenreKeywords(title: string): string[] {
     { pattern: /rock/i, keyword: 'Rock songs' },
     { pattern: /pop/i, keyword: 'Pop songs' },
   ];
-  
   for (const { pattern, keyword } of genrePatterns) {
-    if (pattern.test(lowerTitle)) {
-      keywords.push(keyword);
-    }
+    if (pattern.test(lowerTitle)) keywords.push(keyword);
   }
-  
-  // Year pattern - useful for finding similar era songs
   const yearMatch = lowerTitle.match(/20(2[0-5]|1[0-9])/);
   if (yearMatch && keywords.length > 0) {
     keywords[0] = keywords[0].replace(' songs', ` songs ${yearMatch[0]}`);
   }
-  
   return keywords;
 }
 
-// Extract artist name from title (often in "Artist - Song" format or after | symbol)
 function extractArtistFromTitle(title: string): string | null {
-  // Try "Artist - Song" format
   if (title.includes(' - ')) {
     const parts = title.split(' - ');
-    const artistPart = parts[0].trim()
-      .replace(/\(.*?\)/g, '')
-      .replace(/\[.*?\]/g, '')
-      .trim();
-    // Artist names are usually short
+    const artistPart = parts[0].trim().replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
     if (artistPart.length > 2 && artistPart.length < 30 && !artistPart.match(/official|video|audio|lyric/i)) {
       return artistPart;
     }
   }
-  
-  // Try to find artist after specific patterns
-  const patterns = [
-    /\|\s*([A-Z][a-zA-Z\s]+?)(?:\s*\||$)/,  // After | symbol
-    /by\s+([A-Z][a-zA-Z\s]+?)(?:\s*\||$)/i,  // "by Artist"
-  ];
-  
+  const patterns = [/\|\s*([A-Z][a-zA-Z\s]+?)(?:\s*\||$)/, /by\s+([A-Z][a-zA-Z\s]+?)(?:\s*\||$)/i];
   for (const pattern of patterns) {
     const match = title.match(pattern);
     if (match && match[1] && match[1].length < 25) {
       const artist = match[1].trim();
-      if (!artist.match(/official|video|new|songs|music|audio/i)) {
-        return artist;
-      }
+      if (!artist.match(/official|video|new|songs|music|audio/i)) return artist;
     }
   }
-  
   return null;
 }
 
-// Check if a title contains a specific song name
 function titleContainsSong(title: string, songName: string): boolean {
-  const normalizedTitle = title.toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ');
-  const normalizedSong = songName.toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ');
-  
-  // Check if title contains the song name
+  const normalizedTitle = title.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ');
+  const normalizedSong = songName.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ');
   if (normalizedTitle.includes(normalizedSong)) return true;
-  
-  // Check if song name words appear in title
   const songWords = normalizedSong.split(' ').filter(w => w.length > 2);
   if (songWords.length >= 1) {
     const matchingWords = songWords.filter(w => normalizedTitle.includes(w));
-    // If most words match, it's likely the same song
     if (matchingWords.length >= Math.ceil(songWords.length * 0.7)) return true;
   }
-  
   return false;
 }
 
-// Check if two titles are duplicates of each other
 function areTitlesDuplicates(title1: string, title2: string, coreSongName: string): boolean {
-  // First check: does the new title contain the core song name?
-  if (coreSongName && titleContainsSong(title2, coreSongName)) {
-    return true;
-  }
-  
-  // Extract core song names from both titles
+  if (coreSongName && titleContainsSong(title2, coreSongName)) return true;
   const song1 = extractCoreSongName(title1);
   const song2 = extractCoreSongName(title2);
-  
-  // If extracted song names are similar, it's a duplicate
   if (song1 === song2) return true;
   if (song1.length > 3 && song2.length > 3) {
     if (song1.includes(song2) || song2.includes(song1)) return true;
   }
-  
-  // Check word overlap for song names
   const words1 = song1.split(' ').filter(w => w.length > 2);
   const words2 = song2.split(' ').filter(w => w.length > 2);
-  
   if (words1.length >= 1 && words2.length >= 1) {
     const matchingWords = words1.filter(w => words2.includes(w));
-    const matchRatio = matchingWords.length / Math.min(words1.length, words2.length);
-    if (matchRatio >= 0.6) return true;
+    if (matchingWords.length / Math.min(words1.length, words2.length) >= 0.6) return true;
   }
-  
   return false;
 }
 
-// Direct YouTube scraping for related content
+// Updated search function to use YouTube Music filter
 async function searchYouTubeRelated(query: string, excludeVideoId: string, currentSongTitle: string, coreSongName: string, existingTitles: string[]): Promise<Track[]> {
-  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-  console.log('Searching YouTube:', searchUrl);
+  // ADDED: &sp=Eg-KAQwIARAA (Filter for Songs / YouTube Music)
+  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=Eg-KAQwIARAA`;
+  console.log('Searching YouTube Music (Recommendations):', searchUrl);
   
   const response = await fetch(searchUrl, {
     headers: {
@@ -228,20 +172,15 @@ async function searchYouTubeRelated(query: string, excludeVideoId: string, curre
     
     if (!lengthText || lengthText.includes('LIVE')) continue;
     
-    // Skip if it's a duplicate of the current song
-    if (areTitlesDuplicates(currentSongTitle, title, coreSongName)) {
-      console.log('Skipping duplicate of current song:', title);
-      continue;
-    }
+    // Strict Duplicate Filtering for Recommendations
+    if (areTitlesDuplicates(currentSongTitle, title, coreSongName)) continue;
     
-    // Skip if it's a duplicate of already added tracks
     const newSongName = extractCoreSongName(title);
     const isDuplicate = addedSongNames.some(existing => {
       if (existing === newSongName) return true;
       if (existing.length > 3 && newSongName.length > 3) {
         if (existing.includes(newSongName) || newSongName.includes(existing)) return true;
       }
-      // Check word overlap
       const words1 = existing.split(' ').filter(w => w.length > 2);
       const words2 = newSongName.split(' ').filter(w => w.length > 2);
       if (words1.length >= 1 && words2.length >= 1) {
@@ -251,11 +190,7 @@ async function searchYouTubeRelated(query: string, excludeVideoId: string, curre
       return false;
     });
     
-    if (isDuplicate) {
-      console.log('Skipping duplicate track:', title);
-      continue;
-    }
-    
+    if (isDuplicate) continue;
     addedSongNames.push(newSongName);
     
     const lengthParts = lengthText.split(':').map(Number);
@@ -266,7 +201,6 @@ async function searchYouTubeRelated(query: string, excludeVideoId: string, curre
       lengthMs = (lengthParts[0] * 60 + lengthParts[1]) * 1000;
     }
     
-    // Skip videos longer than 12 minutes or shorter than 1 minute
     if (lengthMs > 12 * 60 * 1000 || lengthMs < 60 * 1000) continue;
     
     tracks.push({
@@ -295,94 +229,45 @@ serve(async (req) => {
   try {
     const { videoId, title, author, existingTitles = [] } = await req.json();
     
-    console.log('Fetching recommendations for:', { videoId, title, author, existingTitlesCount: existingTitles.length });
+    console.log('Fetching recommendations for:', { videoId, title, author });
     
     if (!title && !author) {
-      return new Response(
-        JSON.stringify({ results: [] }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ results: [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     
     const coreSongName = extractCoreSongName(title || '');
-    
-    // Extract genre keywords from the title (e.g., "Haryanvi", "Punjabi", etc.)
     const genreKeywords = extractGenreKeywords(title || '');
-    console.log('Extracted genre keywords:', genreKeywords);
-    
-    // Extract actual artist from the title if possible
     const titleArtist = extractArtistFromTitle(title || '');
-    console.log('Extracted artist from title:', titleArtist);
-    
-    // Include current song title in existing titles for dedup
     const allExistingTitles = [title, ...existingTitles].filter(Boolean);
     
-    // Build search queries - prioritize genre-based searches for regional music
     const queries: string[] = [];
     
-    // If we found genre keywords, use those first (most important for regional music)
-    if (genreKeywords.length > 0) {
-      queries.push(...genreKeywords.slice(0, 2)); // e.g., "Haryanvi songs 2024"
-    }
+    if (genreKeywords.length > 0) queries.push(...genreKeywords.slice(0, 2));
+    if (titleArtist) queries.push(`${titleArtist} songs`);
+    if (coreSongName && coreSongName.split(' ').length >= 2) queries.push(`${coreSongName} similar songs`);
     
-    // If we extracted an artist from the title, use that
-    if (titleArtist) {
-      queries.push(`${titleArtist} songs`);
-    }
-    
-    // Use core song name for "similar to" search
-    if (coreSongName && coreSongName.split(' ').length >= 2) {
-      queries.push(`${coreSongName} similar songs`);
-    }
-    
-    // Fallback to channel name only if no better options
     if (queries.length === 0 && author) {
-      const cleanAuthor = author
-        .replace(/VEVO$/i, '')
-        .replace(/Official$/i, '')
-        .replace(/ - Topic$/i, '')
-        .trim();
-      if (cleanAuthor.length > 2) {
-        queries.push(`${cleanAuthor} songs`);
-      }
+      const cleanAuthor = author.replace(/VEVO$/i, '').replace(/Official$/i, '').replace(/ - Topic$/i, '').trim();
+      if (cleanAuthor.length > 2) queries.push(`${cleanAuthor} songs`);
     }
     
-    // Final fallback - just search for popular songs
-    if (queries.length === 0) {
-      queries.push('new songs 2024');
-    }
-    
-    console.log('Search queries:', queries);
+    if (queries.length === 0) queries.push('new songs 2024');
     
     for (const query of queries) {
       try {
-        console.log('Trying query:', query);
         const results = await searchYouTubeRelated(query, videoId, title, coreSongName, allExistingTitles);
-        
         if (results.length >= 3) {
-          console.log(`Found ${results.length} recommendations`);
-          return new Response(
-            JSON.stringify({ results }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+          return new Response(JSON.stringify({ results }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
-        console.log(`Only found ${results.length} results, trying next query`);
       } catch (error) {
         console.error('Query failed:', query, error);
       }
     }
     
-    console.log('No recommendations found');
-    return new Response(
-      JSON.stringify({ results: [] }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ results: [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     
   } catch (error) {
     console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to fetch recommendations' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to fetch recommendations' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
