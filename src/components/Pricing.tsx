@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, Star, Zap } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 const Pricing = () => {
@@ -9,7 +9,7 @@ const Pricing = () => {
   const plans = [
     {
       name: "Free",
-      price: "$0",
+      price: "₹0",
       description: "Perfect for small communities starting out.",
       features: [
         "High-quality music playback",
@@ -22,7 +22,7 @@ const Pricing = () => {
     },
     {
       name: "Pro",
-      price: isAnnual ? "$3.99" : "$4.99",
+      price: isAnnual ? "₹249" : "₹299",
       description: "Advanced features for growing servers.",
       features: [
         "Everything in Free",
@@ -35,25 +35,10 @@ const Pricing = () => {
       highlight: true,
       badge: "MOST POPULAR",
     },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      description: "For large networks and verified servers.",
-      features: [
-        "Everything in Pro",
-        "Dedicated Node Server",
-        "Custom Bot Branding",
-        "White-label Solution",
-        "Direct Developer Access",
-        "SLA Guarantee",
-      ],
-      highlight: false,
-    },
   ];
 
   return (
     <section id="pricing" className="py-24 relative overflow-hidden">
-      {/* Background Glows */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] -z-10" />
 
       <div className="container mx-auto px-4 relative z-10">
@@ -65,7 +50,6 @@ const Pricing = () => {
             Choose the perfect plan for your community. No hidden fees.
           </p>
 
-          {/* Toggle Switch */}
           <div className="flex items-center justify-center gap-4 pt-4">
             <span className={`text-sm font-medium ${!isAnnual ? 'text-white' : 'text-muted-foreground'}`}>Monthly</span>
             <Switch
@@ -79,7 +63,8 @@ const Pricing = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
+        {/* Centered Grid for 2 items */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-center">
           {plans.map((plan, index) => (
             <div
               key={index}
@@ -89,7 +74,6 @@ const Pricing = () => {
                   : "bg-card/40 border-border hover:border-primary/30"
               } border backdrop-blur-sm`}
             >
-              {/* Holographic/Highlight Effect for Pro Plan */}
               {plan.highlight && (
                 <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-accent/20 blur-xl opacity-50" />
               )}
@@ -105,7 +89,7 @@ const Pricing = () => {
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold">{plan.price}</span>
-                  {plan.price !== "Custom" && <span className="text-muted-foreground">/mo</span>}
+                  <span className="text-muted-foreground">/mo</span>
                 </div>
                 <p className="text-muted-foreground mt-4 text-sm">{plan.description}</p>
               </div>
@@ -126,7 +110,7 @@ const Pricing = () => {
                 className={`w-full ${plan.highlight ? 'shadow-lg hover:shadow-primary/25' : ''}`}
                 size="lg"
               >
-                {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
+                Get Started
               </Button>
             </div>
           ))}
