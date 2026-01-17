@@ -17,8 +17,26 @@ interface Track {
   };
 }
 
+// STRICT FILTER: Reject anything that looks like a video file
+function isCleanSong(title: string, author: string): boolean {
+  const t = title.toLowerCase();
+  const a = author.toLowerCase();
+  
+  // Reject common video markers
+  if (t.includes("official video")) return false;
+  if (t.includes("music video")) return false;
+  if (t.includes("lyric video")) return false;
+  if (t.includes("live at")) return false;
+  if (t.includes("live performance")) return false;
+  if (t.includes("reaction")) return false;
+  if (t.includes("behind the scenes")) return false;
+  if (t.includes("cover by") && !t.includes("cover")) return false; // Allow if user searched for cover
+  
+  return true;
+}
+
 async function searchYouTube(query: string): Promise<Track[]> {
-  // ADDED: &sp=Eg-KAQwIARAA to filter for "Songs" (YouTube Music Catalog)
+  // Use Song Filter
   const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=Eg-KAQwIARAA`;
   console.log('Scraping YouTube Music (Songs):', searchUrl);
   
@@ -54,7 +72,12 @@ async function searchYouTube(query: string): Promise<Track[]> {
     const author = video.ownerText?.runs?.[0]?.text || '';
     const lengthText = video.lengthText?.simpleText || '0:00';
     
-    // Logic to parse duration
+    // APPLY STRICT FILTER
+    if (!isCleanSong(title, author)) {
+      console.log(`Skipping Video Result: ${title}`);
+      continue;
+    }
+
     const lengthParts = lengthText.split(':').map(Number);
     let lengthMs = 0;
     if (lengthParts.length === 3) {
@@ -72,7 +95,7 @@ async function searchYouTube(query: string): Promise<Track[]> {
           author,
           length: lengthMs,
           artworkUrl: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-          uri: `https://www.youtube.com/watch?v=${videoId}` // Standard link plays YTM content fine
+          uri: `https://www.youtube.com/watch?v=${videoId}`
         }
       });
     }
@@ -103,7 +126,7 @@ serve(async (req) => {
     
     try {
       results = await searchYouTube(query);
-      console.log(`Found ${results.length} results`);
+      console.log(`Found ${results.length} clean songs`);
     } catch (error) {
       console.log('Direct scraping failed:', error);
     }
