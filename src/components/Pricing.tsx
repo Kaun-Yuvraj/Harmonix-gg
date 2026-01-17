@@ -1,113 +1,134 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Check, Crown, Sparkles } from "lucide-react";
+import { Check, Star, Zap } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const Pricing = () => {
+  const [isAnnual, setIsAnnual] = useState(false);
+
   const plans = [
     {
       name: "Free",
-      price: "₹0",
-      period: "forever",
-      description: "Perfect for getting started",
+      price: "$0",
+      description: "Perfect for small communities starting out.",
       features: [
-        "All basic music commands",
-        "YouTube & Youtube Music support",
-        "Standard audio quality",
-        "Queue management",
-        "Basic filters",
-        "Community support",
+        "High-quality music playback",
+        "Support for YouTube & Spotify",
+        "Basic queue management",
+        "99.9% Uptime",
+        "Standard support",
       ],
-      cta: "Get Started",
-      variant: "outline" as const,
-      icon: Sparkles,
+      highlight: false,
     },
     {
-      name: "Premium",
-      price: "₹200",
-      period: "per month",
-      description: "For the ultimate experience",
+      name: "Pro",
+      price: isAnnual ? "$3.99" : "$4.99",
+      description: "Advanced features for growing servers.",
       features: [
         "Everything in Free",
-        "24/7 playback",
-        "HD audio quality",
-        "Advanced filters",
-        "Autoplay support",
-        "7 Audio Source support",
-        "Custom music panel",
-        "Custom playlists",
-        "Priority support",
-        "No ads",
-        "Faster response time",
+        "24/7 360kbps Audio Quality",
+        "Volume Control & Audio Filters",
+        "24/7 24/7 Mode (No disconnects)",
+        "Custom Playlists (Unlimited)",
+        "Priority Support",
       ],
-      cta: "Go Premium",
-      variant: "hero" as const,
-      popular: true,
-      icon: Crown,
+      highlight: true,
+      badge: "MOST POPULAR",
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      description: "For large networks and verified servers.",
+      features: [
+        "Everything in Pro",
+        "Dedicated Node Server",
+        "Custom Bot Branding",
+        "White-label Solution",
+        "Direct Developer Access",
+        "SLA Guarantee",
+      ],
+      highlight: false,
     },
   ];
 
   return (
     <section id="pricing" className="py-24 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
-      </div>
+      {/* Background Glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] -z-10" />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Simple <span className="text-gradient">Pricing</span>
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Simple, Transparent <span className="text-gradient">Pricing</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that's right for your server
+            Choose the perfect plan for your community. No hidden fees.
           </p>
+
+          {/* Toggle Switch */}
+          <div className="flex items-center justify-center gap-4 pt-4">
+            <span className={`text-sm font-medium ${!isAnnual ? 'text-white' : 'text-muted-foreground'}`}>Monthly</span>
+            <Switch
+              checked={isAnnual}
+              onCheckedChange={setIsAnnual}
+              className="data-[state=checked]:bg-primary"
+            />
+            <span className={`text-sm font-medium ${isAnnual ? 'text-white' : 'text-muted-foreground'}`}>
+              Yearly <span className="text-primary text-xs bg-primary/10 px-2 py-0.5 rounded-full ml-1">-20%</span>
+            </span>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
           {plans.map((plan, index) => (
-            <Card
+            <div
               key={index}
-              className={`relative p-8 ${
-                plan.popular
-                  ? "border-primary card-glow bg-gradient-to-b from-card to-card/50"
-                  : "border-border bg-card"
-              } hover:scale-105 transition-all duration-300`}
+              className={`relative group rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 ${
+                plan.highlight
+                  ? "bg-card/80 border-primary/50 shadow-glow z-10 scale-105"
+                  : "bg-card/40 border-border hover:border-primary/30"
+              } border backdrop-blur-sm`}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
-                    Most Popular
-                  </div>
+              {/* Holographic/Highlight Effect for Pro Plan */}
+              {plan.highlight && (
+                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-accent/20 blur-xl opacity-50" />
+              )}
+
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 animate-pulse">
+                  <Star className="w-3 h-3 fill-current" />
+                  {plan.badge}
                 </div>
               )}
 
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-                  <plan.icon className="w-8 h-8 text-primary" />
-                </div>
+              <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-2">
-                  <span className="text-5xl font-bold text-gradient">{plan.price}</span>
-                  <span className="text-muted-foreground">/{plan.period}</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold">{plan.price}</span>
+                  {plan.price !== "Custom" && <span className="text-muted-foreground">/mo</span>}
                 </div>
-                <p className="text-muted-foreground mt-2">{plan.description}</p>
+                <p className="text-muted-foreground mt-4 text-sm">{plan.description}</p>
               </div>
 
               <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-primary" />
+                {plan.features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm">
+                    <div className={`rounded-full p-1 ${plan.highlight ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                      <Check className="w-3 h-3" />
                     </div>
                     <span className="text-foreground/90">{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <Button variant={plan.variant} className="w-full" size="lg">
-                {plan.cta}
+              <Button
+                variant={plan.highlight ? "hero" : "outline"}
+                className={`w-full ${plan.highlight ? 'shadow-lg hover:shadow-primary/25' : ''}`}
+                size="lg"
+              >
+                {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
               </Button>
-            </Card>
+            </div>
           ))}
         </div>
       </div>
