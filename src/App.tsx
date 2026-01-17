@@ -9,7 +9,7 @@ import Terms from "./pages/Terms";
 import Callback from "./pages/Callback";
 import NodeStatus from "./pages/NodeStatus";
 import NotFound from "./pages/NotFound";
-import ScrollToTop from "@/components/ScrollToTop"; // Import the new component
+import ScrollToTop from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +19,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ScrollToTop /> {/* Add this line here */}
+        {/* This component handles the scrolling globally */}
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
