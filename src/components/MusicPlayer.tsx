@@ -501,6 +501,7 @@ const MusicPlayer = () => {
                     videoId={currentTrack.info.identifier}
                     title={currentTrack.info.title} 
                     artist={currentTrack.info.author}
+                    duration={currentTrack.info.length}
                     currentTime={currentTime}
                     isPlaying={isPlaying}
                   />
