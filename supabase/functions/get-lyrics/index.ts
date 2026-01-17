@@ -27,15 +27,20 @@ function cleanTitle(title: string): string {
     .trim();
 }
 
-// Check if result artist matches requested artist
 function checkArtistMatch(resultArtist: string, targetArtist: string): boolean {
-  if (!resultArtist || !targetArtist) return true; // Loose match if missing info
+  if (!resultArtist || !targetArtist) return true;
   const r = resultArtist.toLowerCase();
   const t = targetArtist.toLowerCase();
   return r.includes(t) || t.includes(r);
 }
 
-// 1. YouTube Captions (Synced)
+function checkDurationMatch(resultDuration: number, targetDuration: number): boolean {
+  if (!resultDuration || !targetDuration) return true;
+  const diff = Math.abs(resultDuration - (targetDuration / 1000));
+  return diff < 15;
+}
+
+// 1. YouTube Captions (Synced - High Priority)
 async function fetchYouTubeLyrics(videoId: string): Promise<LyricLine[] | null> {
   try {
     const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
@@ -47,7 +52,22 @@ async function fetchYouTubeLyrics(videoId: string): Promise<LyricLine[] | null> 
       const tracks = captionsData?.playerCaptionsTracklistRenderer?.captionTracks;
       
       if (tracks && tracks.length > 0) {
-        const track = tracks.find((t: any) => t.languageCode === 'en') || tracks[0];
+        // IMPROVED: Sort tracks to find English (en) or Auto-generated (asr)
+        // Priorities: 
+        // 1. English Manual (.en)
+        // 2. English Auto (.en + kind=asr)
+        // 3. First available
+        
+        tracks.sort((a: any, b: any) => {
+           if (a.languageCode === 'en' && !a.kind) return -1; // Manual Eng first
+           if (b.languageCode === 'en' && !b.kind) return 1;
+           if (a.languageCode === 'en') return -1; // Auto Eng second
+           return 0;
+        });
+
+        const track = tracks[0];
+        console.log(`Using Caption Track: ${track.name?.simpleText} (${track.languageCode})`);
+
         const transcriptResponse = await fetch(track.baseUrl);
         const transcriptXml = await transcriptResponse.text();
         
@@ -56,8 +76,11 @@ async function fetchYouTubeLyrics(videoId: string): Promise<LyricLine[] | null> 
         
         for (const match of textMatches) {
           const text = match[3]
-            .replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
-          if (text && !text.startsWith('[') && !text.startsWith('(')) {
+            .replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')
+            .replace(/\[Music\]/gi, '').replace(/\(Music\)/gi, '') // Clean common noise
+            .trim();
+            
+          if (text) {
             lines.push({ time: parseFloat(match[1]) * 1000, text });
           }
         }
@@ -68,18 +91,25 @@ async function fetchYouTubeLyrics(videoId: string): Promise<LyricLine[] | null> 
   return null;
 }
 
-// 2. LRCLIB (Synced - With Artist Check)
-async function fetchLrcLib(title: string, artist: string): Promise<LyricLine[] | null> {
+// 2. LRCLIB (Synced - With Duration & Artist Check)
+async function fetchLrcLib(title: string, artist: string, duration: number): Promise<LyricLine[] | null> {
   try {
-    // Search with Artist + Title
     const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(artist + ' ' + title)}`;
     const res = await fetch(searchUrl);
     const data = await res.json();
     
-    // Filter results for correct artist
-    const match = data.find((t: any) => 
-      t.syncedLyrics && checkArtistMatch(t.artistName, artist)
+    let match = data.find((t: any) => 
+      t.syncedLyrics && 
+      checkArtistMatch(t.artistName, artist) &&
+      checkDurationMatch(t.duration, duration)
     );
+
+    if (!match) {
+      match = data.find((t: any) => 
+        t.syncedLyrics && 
+        checkArtistMatch(t.artistName, artist)
+      );
+    }
 
     if (match) {
       const lines: LyricLine[] = [];
@@ -104,19 +134,21 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const { videoId, title, artist } = await req.json();
+    const { videoId, title, artist, duration } = await req.json();
     const cleanedTitle = cleanTitle(title);
     const cleanedArtist = artist.replace(/VEVO|Official|Topic/gi, '').trim();
 
-    console.log(`Lyrics Search: "${cleanedTitle}" by "${cleanedArtist}"`);
-
-    // Strategy 1: YouTube (Best for obscure/remix songs)
+    // Strategy 1: YouTube Captions (BEST FOR SYNC)
     let lyrics = await fetchYouTubeLyrics(videoId);
-    if (lyrics) return new Response(JSON.stringify({ lyrics }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (lyrics) {
+      return new Response(JSON.stringify({ lyrics }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
-    // Strategy 2: LRCLIB (Best for popular songs)
-    lyrics = await fetchLrcLib(cleanedTitle, cleanedArtist);
-    if (lyrics) return new Response(JSON.stringify({ lyrics }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // Strategy 2: LRCLIB (Fallback)
+    lyrics = await fetchLrcLib(cleanedTitle, cleanedArtist, duration);
+    if (lyrics) {
+      return new Response(JSON.stringify({ lyrics }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     return new Response(JSON.stringify({ error: 'No lyrics found' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
