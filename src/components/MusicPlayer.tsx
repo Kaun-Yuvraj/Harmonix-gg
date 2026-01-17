@@ -7,7 +7,6 @@ import {
   Volume2, VolumeX, Trash2, Heart, History, ListMusic, Disc
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-// Removed LyricsDisplay import
 import { supabase } from "@/integrations/supabase/client";
 import MiniPlayer from "./MiniPlayer";
 import DraggableQueueItem from "./DraggableQueueItem";
@@ -246,7 +245,6 @@ const MusicPlayer = () => {
       playTrack(q[nextIdx]);
       addToHistory(q[nextIdx]);
       
-      // Aggressive Autoplay - Fetch if queue is getting low
       if (autoplayEnabledRef.current && q.length - nextIdx <= 5) {
         fetchRecommendationsForTrack(q[nextIdx], q);
       }
@@ -270,10 +268,11 @@ const MusicPlayer = () => {
       let data = await res.json();
       
       if (!data.results || data.results.length === 0) {
-        console.log("Autoplay: No recommendations, trying fallback mix search...");
+        console.log("Autoplay: No recommendations, trying fallback Artist Song search...");
+        // Fallback: Search for Artist's other songs (not Mix, as Mix is a playlist)
         res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: `${track.info.author} mix music` })
+          body: JSON.stringify({ query: `${track.info.author} songs` })
         });
         data = await res.json();
       }
