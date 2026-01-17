@@ -1,0 +1,16 @@
+project_id = "ryhzqxuxmjajgmkxylmn"
+
+[functions.youtube-search]
+verify_jwt = false
+
+[functions.get-lyrics]
+verify_jwt = false
+
+[functions.get-recommendations]
+verify_jwt = false
+
+[functions.translate-lyrics]
+verify_jwt = false
+
+[functions.lavalink-stats]
+verify_jwt = false
