@@ -6,12 +6,12 @@ const Pricing = () => {
   const plans = [
     {
       name: "Free",
-      price: "$0",
+      price: "₹0",
       period: "forever",
       description: "Perfect for getting started",
       features: [
         "All basic music commands",
-        "YouTube & Spotify support",
+        "YouTube & Youtube Music support",
         "Standard audio quality",
         "Queue management",
         "Basic filters",
@@ -23,7 +23,7 @@ const Pricing = () => {
     },
     {
       name: "Premium",
-      price: "$4.99",
+      price: "₹200",
       period: "per month",
       description: "For the ultimate experience",
       features: [
@@ -31,6 +31,9 @@ const Pricing = () => {
         "24/7 playback",
         "HD audio quality",
         "Advanced filters",
+        "Autoplay support",
+        "7 Audio Source support",
+        "Custom music panel",
         "Custom playlists",
         "Priority support",
         "No ads",

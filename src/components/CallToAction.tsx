@@ -29,13 +29,13 @@ const CallToAction = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button variant="hero" size="lg" className="text-lg" asChild>
-              <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
+              <a href="https://discord.com/api/oauth2/authorize?client_id=1356181162099347517&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
                 <Music className="w-5 h-5" />
                 Add to Discord Now
               </a>
             </Button>
             <Button variant="outline" size="lg" className="text-lg" asChild>
-              <a href="https://discord.gg/your-server" target="_blank" rel="noopener noreferrer">
+              <a href="https://discord.gg/29ZBy6hAxF" target="_blank" rel="noopener noreferrer">
                 Join Support Server
               </a>
             </Button>

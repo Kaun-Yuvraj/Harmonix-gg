@@ -36,12 +36,11 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-            Stream high-quality music from Spotify, YouTube, and more with advanced filters, 24/7 playback, and intuitive controls.
-          </p>
+            Harmonix - A premium music experience for your Discord server with Spotify, YouTube Music, SoundCloud, Jio Saavn, Deezer, Apple music and more. High-quality audio, advanced filters, and 24/7 playback.          </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button variant="hero" size="lg" className="text-lg" asChild>
-              <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
+              <a href="https://discord.com/api/oauth2/authorize?client_id=1356181162099347517&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
                 <Play className="w-5 h-5" />
                 Add to Discord
               </a>

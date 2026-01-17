@@ -14,7 +14,7 @@ const Developer = () => {
 
   const achievements = [
     "Designed Harmonix bot architecture",
-    "Integrated Spotify, YouTube & SoundCloud",
+    "Integrated Spotify, Apple Music and 5 other Audio Sources",
     "Built advanced music filters & controls",
     "Optimized audio performance & 24/7 uptime",
   ];
@@ -43,7 +43,7 @@ const Developer = () => {
               <div className="text-center mb-8">
                 <div className="mb-6">
                   <img
-                    src="https://cdn.discordapp.com/avatars/977229749539713116/cc503e838dceecaa6b519dbceda334e7.webp?size=512"
+                    src="https://avatars.githubusercontent.com/u/159287148?s=400&u=911ee2c405ce88a93e63610c314cc0bf75e5fbb2&v=4"
                     alt="Yuvraj Jaiswal"
                     className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-primary shadow-lg"
                   />
