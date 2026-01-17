@@ -7,7 +7,7 @@ import {
   Volume2, VolumeX, Trash2, Heart, History, ListMusic, Disc
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { LyricsDisplay } from "./LyricsDisplay";
+// Removed LyricsDisplay import
 import { supabase } from "@/integrations/supabase/client";
 import MiniPlayer from "./MiniPlayer";
 import DraggableQueueItem from "./DraggableQueueItem";
@@ -246,7 +246,7 @@ const MusicPlayer = () => {
       playTrack(q[nextIdx]);
       addToHistory(q[nextIdx]);
       
-      // FIX: Aggressive Autoplay - Fetch if queue is getting low
+      // Aggressive Autoplay - Fetch if queue is getting low
       if (autoplayEnabledRef.current && q.length - nextIdx <= 5) {
         fetchRecommendationsForTrack(q[nextIdx], q);
       }
@@ -262,7 +262,6 @@ const MusicPlayer = () => {
     try {
       const existingTitles = currentQueue.map(t => t.info.title);
       
-      // Try fetching recommendations
       let res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-recommendations`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId: track.info.identifier, title: track.info.title, existingTitles })
@@ -270,7 +269,6 @@ const MusicPlayer = () => {
       
       let data = await res.json();
       
-      // FALLBACK: If no recommendations, search for "Artist Mix" to keep playing unlimited
       if (!data.results || data.results.length === 0) {
         console.log("Autoplay: No recommendations, trying fallback mix search...");
         res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-search`, {
@@ -284,7 +282,7 @@ const MusicPlayer = () => {
         const existingIds = new Set(currentQueue.map(t => t.info.identifier));
         const newTracks = data.results
           .filter((t: Track) => !existingIds.has(t.info.identifier))
-          .slice(0, 10); // Add up to 10 songs at once
+          .slice(0, 10);
         
         if (newTracks.length > 0) {
           setQueue(prev => [...prev, ...newTracks]);
@@ -295,8 +293,6 @@ const MusicPlayer = () => {
     setIsLoadingRecommendations(false);
   };
 
-  // ... [Keep other helpers: formatDuration, handleVolumeChange, toggleMute, seekTo, etc.]
-  // Re-implemented standard helpers for completeness
   const formatDuration = (ms: number) => {
     const sec = Math.floor(ms / 1000);
     return `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}`;
@@ -325,10 +321,7 @@ const MusicPlayer = () => {
   const isFavorite = currentTrack ? favorites.some(f => f.info.identifier === currentTrack.info.identifier) : false;
 
   return (
-    // FIX: Removed 'overflow-hidden' from main section to fix page scrolling issues
     <section id="web-player" className="py-24 bg-card/30 relative">
-      
-      {/* Background Ambience - Overflow Hidden applied ONLY here */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-primary/10 rounded-full blur-[150px] transition-opacity duration-1000 ${isPlaying ? 'opacity-100 animate-pulse-slow' : 'opacity-30'}`} />
       </div>
@@ -491,24 +484,8 @@ const MusicPlayer = () => {
             )}
           </div>
 
-          {/* Right Column: Queue & Lyrics */}
+          {/* Right Column: Queue Only */}
           <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
-            
-            {/* Lyrics Card */}
-            {currentTrack && (
-              <Card className="bg-black/40 border-white/10 backdrop-blur-md overflow-hidden min-h-[300px] relative group rounded-2xl">
-                 <LyricsDisplay 
-                    videoId={currentTrack.info.identifier}
-                    title={currentTrack.info.title} 
-                    artist={currentTrack.info.author}
-                    duration={currentTrack.info.length}
-                    currentTime={currentTime}
-                    isPlaying={isPlaying}
-                  />
-              </Card>
-            )}
-
-            {/* Queue Card */}
             <Card className="bg-card/20 border-white/5 backdrop-blur-md overflow-hidden rounded-2xl">
                <div className="p-6">
                  <div className="flex justify-between items-center mb-6">
@@ -571,7 +548,6 @@ const MusicPlayer = () => {
                       </DndContext>
                     )}
                     
-                    {/* Favorites/History List rendering (kept simple for brevity as logic is same as before) */}
                     {(showFavorites ? favorites : showHistory ? history : []).map((track, index) => (
                       <div key={index} className="flex items-center gap-4 p-3 bg-card/50 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer" onClick={() => addToQueue(track, true)}>
                          <img src={track.info.artworkUrl} className="w-10 h-10 rounded" />
