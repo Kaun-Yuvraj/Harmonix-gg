@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Music, Mic2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,21 +24,28 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchLyrics = async () => {
-      setLoading(true);
-      setError(null);
-      setLyrics([]);
+    // FORCE RESET on song change
+    setLyrics([]);
+    setError(null);
+    setLoading(true);
 
+    const fetchLyrics = async () => {
       try {
+        console.log("Auto-fetching lyrics for:", title);
+        
         const { data, error } = await supabase.functions.invoke('get-lyrics', {
-          body: { title, artist }
+          body: { videoId, title, artist }
         });
 
         if (error) throw error;
 
         if (data?.lyrics) {
           const parsedLyrics = parseLyrics(data.lyrics);
-          setLyrics(parsedLyrics);
+          if (parsedLyrics.length > 0) {
+            setLyrics(parsedLyrics);
+          } else {
+            setError("Lyrics format not supported");
+          }
         } else {
           setError("Lyrics not found");
         }
@@ -51,12 +57,15 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
       }
     };
 
-    if (title && artist) {
+    if (title) {
       fetchLyrics();
+    } else {
+      setLoading(false);
+      setError("Waiting for track...");
     }
-  }, [title, artist]);
+  }, [videoId, title, artist]); // Strict dependency ensures re-run on new song
 
-  // Auto-scroll to active line
+  // Auto-scroll logic
   useEffect(() => {
     if (activeLineRef.current && containerRef.current) {
       activeLineRef.current.scrollIntoView({
@@ -64,34 +73,39 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
         block: "center",
       });
     }
-  }, [currentTime]);
+  }, [currentTime, lyrics]);
 
-  const parseLyrics = (lrc: string): LyricLine[] => {
-    const lines = lrc.split('\n');
-    return lines
-      .map(line => {
-        const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
-        if (match) {
-          const minutes = parseInt(match[1]);
-          const seconds = parseInt(match[2]);
-          const ms = parseInt(match[3].padEnd(3, '0'));
-          const startTime = minutes * 60 * 1000 + seconds * 1000 + ms;
-          return {
-            text: match[4].trim(),
-            startTime,
-            duration: 0 
-          };
-        }
-        return null;
-      })
-      .filter((line): line is LyricLine => line !== null && line.text.length > 0)
-      .map((line, index, array) => {
-        const nextLine = array[index + 1];
-        return {
-          ...line,
-          duration: nextLine ? nextLine.startTime - line.startTime : 5000
-        };
-      });
+  const parseLyrics = (lrc: any): LyricLine[] => {
+    // Handle both string format and pre-parsed array format from backend
+    if (Array.isArray(lrc)) {
+      return lrc.map((line: any) => ({
+        text: line.text,
+        startTime: line.time,
+        duration: 0
+      }));
+    }
+
+    if (typeof lrc === 'string') {
+      const lines = lrc.split('\n');
+      return lines
+        .map(line => {
+          const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+          if (match) {
+            const minutes = parseInt(match[1]);
+            const seconds = parseInt(match[2]);
+            const ms = parseInt(match[3].padEnd(3, '0'));
+            const startTime = minutes * 60 * 1000 + seconds * 1000 + ms;
+            return {
+              text: match[4].trim(),
+              startTime,
+              duration: 0 
+            };
+          }
+          return null;
+        })
+        .filter((line): line is LyricLine => line !== null && line.text.length > 0);
+    }
+    return [];
   };
 
   const currentLineIndex = lyrics.findIndex((line, index) => {
@@ -103,7 +117,7 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
     return (
       <div className="h-[400px] flex flex-col items-center justify-center text-muted-foreground space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="animate-pulse">Syncing Lyrics...</p>
+        <p className="animate-pulse">Finding Lyrics...</p>
       </div>
     );
   }
@@ -114,18 +128,16 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
           <Music className="w-8 h-8" />
         </div>
-        <p>Instrumental or Lyrics Unavailable</p>
+        <p>{error || "Instrumental or Lyrics Unavailable"}</p>
       </div>
     );
   }
 
   return (
     <div className="relative h-[400px] overflow-hidden" ref={containerRef}>
-      {/* Top/Bottom Fade Masks */}
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-card via-card/80 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card via-card/80 to-transparent z-10 pointer-events-none" />
       
-      {/* Karaoke Icon Background */}
       <div className="absolute top-4 right-4 opacity-10">
         <Mic2 className="w-24 h-24 rotate-12" />
       </div>
