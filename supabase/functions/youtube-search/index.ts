@@ -18,12 +18,13 @@ interface Track {
 }
 
 async function searchYouTube(query: string): Promise<Track[]> {
-  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-  console.log('Scraping YouTube:', searchUrl);
+  // ADDED: &sp=Eg-KAQwIARAA to filter for "Songs" (YouTube Music Catalog)
+  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=Eg-KAQwIARAA`;
+  console.log('Scraping YouTube Music (Songs):', searchUrl);
   
   const response = await fetch(searchUrl, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
       'Accept-Language': 'en-US,en;q=0.9',
     },
     signal: AbortSignal.timeout(10000)
@@ -53,6 +54,7 @@ async function searchYouTube(query: string): Promise<Track[]> {
     const author = video.ownerText?.runs?.[0]?.text || '';
     const lengthText = video.lengthText?.simpleText || '0:00';
     
+    // Logic to parse duration
     const lengthParts = lengthText.split(':').map(Number);
     let lengthMs = 0;
     if (lengthParts.length === 3) {
@@ -70,7 +72,7 @@ async function searchYouTube(query: string): Promise<Track[]> {
           author,
           length: lengthMs,
           artworkUrl: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-          uri: `https://www.youtube.com/watch?v=${videoId}`
+          uri: `https://www.youtube.com/watch?v=${videoId}` // Standard link plays YTM content fine
         }
       });
     }
