@@ -9,6 +9,7 @@ import Terms from "./pages/Terms";
 import Callback from "./pages/Callback";
 import NodeStatus from "./pages/NodeStatus";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "@/components/ScrollToTop"; // Import the new component
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop /> {/* Add this line here */}
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
