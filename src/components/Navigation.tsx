@@ -27,13 +27,14 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <a
+              // FIX 2: Changed to Link component
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className="text-foreground/80 hover:text-primary transition-colors"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <Button variant="hero" size="lg" asChild>
               <a href="https://discord.com/api/oauth2/authorize?client_id=1356181162099347517&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
@@ -55,14 +56,15 @@ const Navigation = () => {
         {isOpen && (
           <div className="md:hidden py-4 space-y-4 border-t border-border">
             {navLinks.map((link) => (
-              <a
+              // FIX 2: Changed to Link component
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className="block text-foreground/80 hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <Button variant="hero" size="lg" className="w-full" asChild>
               <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
