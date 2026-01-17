@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
-import { Github, Twitter, Code2, Globe } from "lucide-react";
+import { Github, Code2, Database, Server, Cpu } from "lucide-react";
 
 const Developer = () => {
-  // Tilt State
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -13,21 +12,19 @@ const Developer = () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Calculate rotation (center of card is 0,0)
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // Max rotation deg
     const max = 10;
     
-    const rotateX = ((y - centerY) / centerY) * -max; // Invert Y for natural feel
+    const rotateX = ((y - centerY) / centerY) * -max;
     const rotateY = ((x - centerX) / centerX) * max;
 
     setRotate({ x: rotateX, y: rotateY });
   };
 
   const handleMouseLeave = () => {
-    setRotate({ x: 0, y: 0 }); // Reset on leave
+    setRotate({ x: 0, y: 0 });
   };
 
   return (
@@ -40,7 +37,6 @@ const Developer = () => {
           <p className="text-muted-foreground">The mind behind Harmonix</p>
         </div>
 
-        {/* 3D Card Container */}
         <div className="flex justify-center perspective-1000">
           <div
             ref={cardRef}
@@ -52,10 +48,8 @@ const Developer = () => {
             }}
             className="relative w-full max-w-md bg-gradient-to-br from-card to-background border border-primary/20 rounded-2xl p-8 shadow-2xl group preserve-3d"
           >
-            {/* Glossy Sheen Overlay */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
 
-            {/* Content (with slight translation for depth) */}
             <div className="flex flex-col items-center text-center transform translate-z-10">
               <div className="relative mb-6">
                 <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-primary to-accent">
@@ -77,30 +71,28 @@ const Developer = () => {
                 Focused on performance, UI/UX, and scalability.
               </p>
 
+              {/* Added Tech Stack Section */}
+              <div className="flex justify-center gap-4 mb-8">
+                <div className="p-2 bg-secondary/50 rounded-lg" title="React">
+                   <Cpu className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="p-2 bg-secondary/50 rounded-lg" title="Node.js">
+                   <Server className="w-5 h-5 text-green-500" />
+                </div>
+                <div className="p-2 bg-secondary/50 rounded-lg" title="Database">
+                   <Database className="w-5 h-5 text-yellow-400" />
+                </div>
+              </div>
+
               <div className="flex gap-4">
                 <a
                   href="https://github.com/Saggexdd"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 hover:-translate-y-1"
+                  className="w-full py-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <Github className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 hover:-translate-y-1"
-                >
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://portfolio.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 hover:-translate-y-1"
-                >
-                  <Globe className="w-5 h-5" />
+                  <span>GitHub Profile</span>
                 </a>
               </div>
             </div>
