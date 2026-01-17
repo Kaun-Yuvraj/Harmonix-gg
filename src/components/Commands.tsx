@@ -38,6 +38,18 @@ const Commands = () => {
         { cmd: "+filter clear", desc: "Remove all filters" },
       ],
     },
+    {
+      title: "Playlist",
+      commands: [
+        { cmd: "+plcreate", desc: "Create a new playlist (public or private)" },
+        { cmd: "+pladd nightcore", desc: "Add current song, search query, or link to playlist" },
+        { cmd: "+browse", desc: "Browse, view, and use public playlists" },
+        { cmd: "+pldelete", desc: "Delete a playlist permanently" },
+        { cmd: "+plinfo", desc: "View detailed playlist information" },
+        { cmd: "+plload", desc: "Load a playlist into the queue" },
+        { cmd: "+plremove", desc: "Remove a track from playlist" },
+      ],
+    },
   ];
 
   return (
