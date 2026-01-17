@@ -6,6 +6,7 @@ interface LyricsDisplayProps {
   videoId: string;
   title: string;
   artist: string;
+  duration: number;
   currentTime: number;
   isPlaying: boolean;
 }
@@ -16,17 +17,19 @@ interface LyricLine {
   duration: number;
 }
 
-export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }: LyricsDisplayProps) => {
+export const LyricsDisplay = ({ videoId, title, artist, duration, currentTime, isPlaying }: LyricsDisplayProps) => {
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Refs for scrolling
   const containerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
 
+  // Sync Adjustment: 300ms delay makes lyrics feel "tighter" and less jumpy
+  const SYNC_COMPENSATION = 300; 
+
   useEffect(() => {
-    // Reset immediately on new song
+    // Reset state on new song
     setLyrics([]);
     setError(null);
     setLoading(true);
@@ -34,7 +37,7 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
     const fetchLyrics = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-lyrics', {
-          body: { videoId, title, artist }
+          body: { videoId, title, artist, duration }
         });
 
         if (error) throw error;
@@ -63,27 +66,22 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
       setLoading(false);
       setError("Waiting for track...");
     }
-  }, [videoId, title, artist]);
+  }, [videoId, title, artist, duration]);
 
-  // FIX: Custom Scroll Logic (Replaces scrollIntoView)
+  // Smooth Scroll Logic
   useEffect(() => {
     if (!containerRef.current || !activeLineRef.current) return;
-
     const container = containerRef.current;
     const activeLine = activeLineRef.current;
     
-    // Calculate the position to center the active line
-    const containerHeight = container.clientHeight;
-    const lineTop = activeLine.offsetTop;
-    const lineHeight = activeLine.clientHeight;
-    
-    const targetScroll = lineTop - (containerHeight / 2) + (lineHeight / 2);
+    // Calculate center position
+    const targetScroll = activeLine.offsetTop - (container.clientHeight / 2) + (activeLine.clientHeight / 2);
 
     container.scrollTo({
       top: targetScroll,
       behavior: 'smooth'
     });
-  }, [currentTime]); // Scrolls only when time updates
+  }, [currentTime]); // Trigger scroll on time update
 
   const parseLyrics = (lrc: any): LyricLine[] => {
     if (Array.isArray(lrc)) {
@@ -96,16 +94,19 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
     return [];
   };
 
+  // Calculate active line with compensation
+  const adjustedTime = currentTime - SYNC_COMPENSATION;
+  
   const currentLineIndex = lyrics.findIndex((line, index) => {
     const nextLine = lyrics[index + 1];
-    return currentTime >= line.startTime && (!nextLine || currentTime < nextLine.startTime);
+    return adjustedTime >= line.startTime && (!nextLine || adjustedTime < nextLine.startTime);
   });
 
   if (loading) {
     return (
       <div className="h-[400px] flex flex-col items-center justify-center text-muted-foreground space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="animate-pulse">Finding Lyrics...</p>
+        <p className="animate-pulse">Syncing Lyrics...</p>
       </div>
     );
   }
@@ -122,17 +123,16 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
   }
 
   return (
-    <div className="relative h-[400px] overflow-hidden rounded-2xl" ref={containerRef}>
+    <div className="relative h-[400px] overflow-hidden rounded-2xl group" ref={containerRef}>
       {/* Top/Bottom Fade Masks */}
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-card via-card/80 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card via-card/80 to-transparent z-10 pointer-events-none" />
       
-      {/* Karaoke Icon Background */}
-      <div className="absolute top-4 right-4 opacity-10">
+      <div className="absolute top-4 right-4 opacity-10 pointer-events-none">
         <Mic2 className="w-24 h-24 rotate-12" />
       </div>
 
-      <div className="py-[40%] px-8 space-y-6 text-center">
+      <div className="py-[40%] px-8 space-y-8 text-center">
         {lyrics.map((line, index) => {
           const isActive = index === currentLineIndex;
           const isPast = index < currentLineIndex;
@@ -141,7 +141,7 @@ export const LyricsDisplay = ({ videoId, title, artist, currentTime, isPlaying }
             <div
               key={index}
               ref={isActive ? activeLineRef : null}
-              className={`transition-all duration-500 ease-out transform
+              className={`transition-all duration-300 ease-out transform
                 ${isActive 
                   ? "scale-110 text-white font-bold text-2xl drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" 
                   : isPast 
