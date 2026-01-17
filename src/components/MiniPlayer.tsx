@@ -1,20 +1,8 @@
-import { Play, Pause, SkipForward, SkipBack, X } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, X, Disc } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface Track {
-  encoded: string;
-  info: {
-    identifier: string;
-    title: string;
-    author: string;
-    length: number;
-    artworkUrl?: string;
-    uri: string;
-  };
-}
-
 interface MiniPlayerProps {
-  currentTrack: Track | null;
+  currentTrack: any;
   isPlaying: boolean;
   currentTime: number;
   onTogglePlay: () => void;
@@ -36,53 +24,51 @@ const MiniPlayer = ({
 }: MiniPlayerProps) => {
   if (!currentTrack || !isVisible) return null;
 
-  const progress = (currentTime / currentTrack.info.length) * 100;
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
-      {/* Progress bar at top */}
-      <div className="h-1 bg-muted">
-        <div 
-          className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-100"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      
-      <div className="bg-card/95 backdrop-blur-lg border-t border-border px-4 py-3">
-        <div className="max-w-screen-xl mx-auto flex items-center gap-4">
-          {/* Album art */}
-          <img
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up w-full max-w-md px-4">
+      <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full p-2 pr-6 shadow-2xl flex items-center gap-4 group hover:scale-105 transition-transform duration-300">
+        {/* Spinning Art */}
+        <div className={`relative w-12 h-12 flex-shrink-0 ${isPlaying ? 'animate-spin-slow' : ''}`}>
+           <div className="absolute inset-0 bg-black rounded-full border border-white/10" />
+           <img
             src={currentTrack.info.artworkUrl || `https://img.youtube.com/vi/${currentTrack.info.identifier}/default.jpg`}
             alt={currentTrack.info.title}
-            className="w-12 h-12 rounded-lg object-cover shadow-lg"
+            className="w-full h-full rounded-full object-cover p-1"
           />
-          
-          {/* Track info */}
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-sm truncate">{currentTrack.info.title}</div>
-            <div className="text-xs text-muted-foreground truncate">{currentTrack.info.author}</div>
+          <div className="absolute inset-0 flex items-center justify-center">
+             <div className="w-2 h-2 bg-black rounded-full" />
           </div>
-          
-          {/* Controls */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={onPrev} className="h-8 w-8">
-              <SkipBack className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="hero" 
-              size="icon" 
-              onClick={onTogglePlay}
-              className="h-10 w-10 rounded-full"
-            >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onNext} className="h-8 w-8">
-              <SkipForward className="h-4 w-4" />
-            </Button>
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-bold truncate text-white">{currentTrack.info.title}</h4>
+          <p className="text-xs text-muted-foreground truncate">{currentTrack.info.author}</p>
+          {/* Micro Progress Bar */}
+          <div className="w-full h-0.5 bg-white/10 mt-1 rounded-full overflow-hidden">
+             <div 
+               className="h-full bg-primary" 
+               style={{ width: `${(currentTime / currentTrack.info.length) * 100}%` }} 
+             />
           </div>
-          
-          {/* Close button */}
-          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={onPrev} className="h-8 w-8 text-white/70 hover:text-white rounded-full">
+            <SkipBack className="h-4 w-4" />
+          </Button>
+          <Button 
+            onClick={onTogglePlay} 
+            size="icon" 
+            className="h-10 w-10 rounded-full bg-white text-black hover:bg-white/90 shadow-glow"
+          >
+            {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current ml-0.5" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onNext} className="h-8 w-8 text-white/70 hover:text-white rounded-full">
+            <SkipForward className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-white/50 hover:text-red-400 rounded-full ml-1">
             <X className="h-4 w-4" />
           </Button>
         </div>
