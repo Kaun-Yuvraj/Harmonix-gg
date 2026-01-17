@@ -1,102 +1,110 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
+import { useState, useRef } from "react";
+import { Github, Twitter, Code2, Globe } from "lucide-react";
 
 const Developer = () => {
-  const skills = [
-    { icon: "fab fa-react", name: "React" },
-    { icon: "fab fa-node", name: "Node.js" },
-    { icon: "fas fa-code", name: "Discord.js" },
-    { icon: "fas fa-server", name: "Lavalink" },
-    { icon: "fas fa-database", name: "MongoDB" },
-    { icon: "fas fa-paint-brush", name: "Tailwind CSS" },
-  ];
+  // Tilt State
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const achievements = [
-    "Designed Harmonix bot architecture",
-    "Integrated Spotify, Apple Music and 5 other Audio Sources",
-    "Built advanced music filters & controls",
-    "Optimized audio performance & 24/7 uptime",
-  ];
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Calculate rotation (center of card is 0,0)
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Max rotation deg
+    const max = 10;
+    
+    const rotateX = ((y - centerY) / centerY) * -max; // Invert Y for natural feel
+    const rotateY = ((x - centerX) / centerX) * max;
+
+    setRotate({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setRotate({ x: 0, y: 0 }); // Reset on leave
+  };
 
   return (
-    <section id="developer" className="py-24 bg-background">
+    <section className="py-24 bg-card/20 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl font-bold mb-4">
             Meet the <span className="text-gradient">Developer</span>
           </h2>
-          <p className="text-xl text-muted-foreground">
-            The passionate creator behind Harmonix
-          </p>
+          <p className="text-muted-foreground">The mind behind Harmonix</p>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary-glow/10 border-primary/20">
-            {/* Badge */}
-            <div className="absolute top-0 right-0 bg-primary text-white px-6 py-2 rounded-bl-2xl font-bold text-sm">
-              DEVELOPER
-            </div>
+        {/* 3D Card Container */}
+        <div className="flex justify-center perspective-1000">
+          <div
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{
+              transform: `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
+              transition: "transform 0.1s ease-out",
+            }}
+            className="relative w-full max-w-md bg-gradient-to-br from-card to-background border border-primary/20 rounded-2xl p-8 shadow-2xl group preserve-3d"
+          >
+            {/* Glossy Sheen Overlay */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
 
-            <div className="p-8">
-              {/* Profile Section */}
-              <div className="text-center mb-8">
-                <div className="mb-6">
+            {/* Content (with slight translation for depth) */}
+            <div className="flex flex-col items-center text-center transform translate-z-10">
+              <div className="relative mb-6">
+                <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-primary to-accent">
                   <img
-                    src="https://avatars.githubusercontent.com/u/159287148?s=400&u=911ee2c405ce88a93e63610c314cc0bf75e5fbb2&v=4"
-                    alt="Yuvraj Jaiswal"
-                    className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-primary shadow-lg"
+                    src="https://github.com/Saggexdd.png"
+                    alt="Developer"
+                    className="w-full h-full rounded-full object-cover border-4 border-background"
                   />
                 </div>
-                <h3 className="text-3xl font-bold mb-2">Yuvraj Jaiswal</h3>
-                <p className="text-muted-foreground text-lg mb-1">
-                  AKA: ! BaBa TiLLu
-                </p>
-                <p className="text-primary font-semibold">Full Stack Developer</p>
-              </div>
-
-              {/* Achievements */}
-              <div className="mb-8">
-                <ul className="space-y-3">
-                  {achievements.map((achievement, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <i className="fas fa-check text-primary mt-1"></i>
-                      <span>{achievement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Skills */}
-              <div className="mb-8">
-                <div className="flex flex-wrap justify-center gap-3">
-                  {skills.map((skill, index) => (
-                    <div
-                      key={index}
-                      className="px-4 py-2 bg-card rounded-full border border-border hover:border-primary transition-colors"
-                    >
-                      <i className={`${skill.icon} mr-2`}></i>
-                      {skill.name}
-                    </div>
-                  ))}
+                <div className="absolute -bottom-2 -right-2 bg-background p-2 rounded-full border border-border shadow-lg">
+                  <Code2 className="w-5 h-5 text-primary" />
                 </div>
               </div>
 
-              {/* GitHub Link */}
-              <div className="text-center">
-                <Button variant="hero" size="lg" asChild>
-                  <a
-                    href="https://github.com/Sagexdd"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="mr-2 h-5 w-5" />
-                    Visit GitHub
-                  </a>
-                </Button>
+              <h3 className="text-2xl font-bold mb-2">Yuvraj (Sage)</h3>
+              <p className="text-primary font-medium mb-4">Full Stack Developer</p>
+              <p className="text-muted-foreground mb-8 leading-relaxed">
+                Passionate about building immersive web experiences and discord bots. 
+                Focused on performance, UI/UX, and scalability.
+              </p>
+
+              <div className="flex gap-4">
+                <a
+                  href="https://github.com/Saggexdd"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 hover:-translate-y-1"
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 hover:-translate-y-1"
+                >
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://portfolio.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-300 hover:-translate-y-1"
+                >
+                  <Globe className="w-5 h-5" />
+                </a>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </section>
