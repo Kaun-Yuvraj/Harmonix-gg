@@ -36,7 +36,7 @@ const Navigation = () => {
               </a>
             ))}
             <Button variant="hero" size="lg" asChild>
-              <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
+              <a href="https://discord.com/api/oauth2/authorize?client_id=1356181162099347517&permissions=36768832&scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">
                 Add to Discord
               </a>
             </Button>
