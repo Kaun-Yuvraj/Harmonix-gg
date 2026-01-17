@@ -33,7 +33,6 @@ const Footer = () => {
               {[
                 { icon: MessageCircle, href: "https://discord.gg/29ZBy6hAxF" },
                 { icon: Github, href: "https://github.com/Saggexdd" },
-                { icon: Twitter, href: "#" }
               ].map((social, i) => (
                 <a
                   key={i}
@@ -49,28 +48,14 @@ const Footer = () => {
           </div>
 
           {/* Links Columns */}
-          <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="md:col-span-7 grid grid-cols-2 gap-8">
             <div>
               <h4 className="font-bold text-white mb-6">Product</h4>
               <ul className="space-y-4">
-                {['Features', 'Commands', 'Pricing', 'Changelog'].map((item) => (
+                {['Features', 'Commands', 'Pricing'].map((item) => (
                   <li key={item}>
                     <a href={`/#${item.toLowerCase()}`} className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
                       <span className="w-0 group-hover:w-2 h-px bg-primary mr-0 group-hover:mr-2 transition-all duration-300"></span>
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-white mb-6">Resources</h4>
-              <ul className="space-y-4">
-                {['Documentation', 'API Reference', 'Community', 'Support'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
-                       <span className="w-0 group-hover:w-2 h-px bg-primary mr-0 group-hover:mr-2 transition-all duration-300"></span>
                       {item}
                     </a>
                   </li>
