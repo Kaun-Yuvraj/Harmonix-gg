@@ -160,6 +160,9 @@ const NodeStatus = () => {
   };
 
   useEffect(() => {
+    // FIX 1: Always scroll to top on mount
+    window.scrollTo(0, 0);
+    
     checkNodeStatus();
     generateLogs();
     generateAvailabilityData();
@@ -167,9 +170,7 @@ const NodeStatus = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+  // FIX 1: Removed the useEffect that auto-scrolled to logsEndRef
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -252,14 +253,7 @@ const NodeStatus = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                {/* Latency Indicator */}
-                <div className="flex items-center gap-2 bg-secondary px-4 py-2 rounded-lg">
-                  <Wifi className={`h-4 w-4 ${getLatencyColor()}`} />
-                  <span className="text-muted-foreground text-sm">LATENCY:</span>
-                  <span className={`font-mono font-medium ${getLatencyColor()}`}>
-                    {latency ? `${latency}ms` : '-'}
-                  </span>
-                </div>
+                {/* FIX 3: Removed Latency Indicator UI Block Here */}
                 <div className="flex items-center gap-2 bg-secondary px-4 py-2 rounded-lg">
                   <Activity className="h-4 w-4 text-primary" />
                   <span className="text-muted-foreground text-sm">SESSION:</span>
